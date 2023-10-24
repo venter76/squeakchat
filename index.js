@@ -284,7 +284,7 @@ app.post("/login", loginLimiter, function(req, res, next) {
       }
 
       // If it's not the user's first login, redirect to their main page.
-      return res.redirect("/homedashboard");
+      return res.redirect("/dashboard");
     });   
   })(req, res, next);
 });
