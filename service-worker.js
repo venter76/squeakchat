@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
 
             fetch(event.request).catch(() => {
-                // Return placeholder.html if the app is offline and the request is for the homepage
+                // Return placeholderchat.html if the app is offline and the request is for the homepage
                 if (event.request.url.includes('/')) {
                     return caches.match('/placeholderchat.html');
                 }
