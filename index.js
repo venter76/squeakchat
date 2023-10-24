@@ -402,7 +402,7 @@ app.post('/register', async function(req, res) {
       await user.save();
 
       // Send verification email
-      const verificationLink = `${process.env.APP_URL}/verify?token=${verificationToken}`;
+      // const verificationLink = `${process.env.APP_URL}/verify?token=${verificationToken}`;
       const email = {
           from: 'brayroadapps@gmail.com',
           to: user.username,
