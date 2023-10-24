@@ -1,4 +1,4 @@
-const CACHE_NAME = 'static-cache-v3';
+const CACHE_NAME = 'static-cache-v4';
 const STATIC_ASSETS = [
     
     '/iconLarge_1.png',
@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
             fetch(event.request).catch(() => {
                 // Return placeholder.html if the app is offline and the request is for the homepage
                 if (event.request.url.includes('/')) {
-                    return caches.match('/placeholder.html');
+                    return caches.match('/placeholderchat.html');
                 }
 
             // caches.match(event.request).then((response) => {
