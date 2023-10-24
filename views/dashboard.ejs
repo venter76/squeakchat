@@ -87,23 +87,33 @@
   <% messages.forEach(function(message) { %>
     <div class="col-12">
       <div class="<%= message.messageColour %>"> <!-- Add the messageColour class here -->
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title"><%= message.sender %></h5>
+          </div>
+          <div>
+            <!-- Format the timestamp using toLocaleString -->
+            <p class="card-text text-right"><%= message.timestamp.toLocaleString('en-ZA') %></p>
+          </div>
+        </div>
         <div class="card-body">
-          <h5 class="card-title"><%= message.sender %></h5>
-           <!-- Format the timestamp using toLocaleString -->
-           <p class="card-text"><%= message.timestamp.toLocaleString('en-ZA') %></p>
           <p class="card-text"><%= message.content %></p>
           <!-- You can add more card content here -->
+          
+          <!-- Add a form to handle the "Delete" action -->
+          <form action="/messagedelete" method="POST">
+            <input type="hidden" name="messageId" value="<%= message._id %>">
+            <button type="submit" class="btn btn-secondary">Delete</button>
+          </form>
         </div>
       </div>
-       <!-- Add a console.log statement to log messageColour -->
-       <script>
-        console.log('messageColour:', '<%= message.messageColour %>');
-      </script>
     </div>
   <% }) %>
   <br>
 </div>
 <br>
+
+
 
 <!-- Add the message input form card -->
 <div class="row mt-4">

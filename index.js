@@ -684,6 +684,23 @@ app.post('/messagesend', async (req, res) => {
 });
 
 
+app.post('/messagedelete', async (req, res) => {
+  try {
+    // Retrieve the messageId from the form data
+    const messageId = req.body.messageId;
+
+    // Implement the code to delete the message from your MongoDB collection
+    // Example:
+    await Message.findByIdAndDelete(messageId);
+
+    // Handle the success response or redirect to a different page
+    res.redirect('/dashboard'); // Redirect to the dashboard or handle the response as needed
+  } catch (error) {
+    // Handle errors
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 
 
