@@ -341,7 +341,7 @@ app.post('/welcome', async (req, res) => {
 
       // User information has been updated successfully
       // Redirect or render the next page here
-      res.redirect('/homedashboard');
+      res.redirect('/dashboard');
 
   } catch (err) {
       console.error(err);
