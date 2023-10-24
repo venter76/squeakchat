@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   
+
+    <title>Index</title>
+
+    <style>
+      ul {
+        list-style: none;
+      }
+    
+      
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+
+  .myLink {
+    color: black;
+    text-decoration: none;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+}
+.modal-content {
+  background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    width: 60%;
+    background-color: #fff;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+
+
+</style>
+  
+ 
+
+
+<link rel="manifest" href="manifest.json" />   
+<meta name="theme-color" content="#008B8B">
+</head>
+  
+
+
+<body class="bg-dark">
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-10 col-10">
+        <h3 class="text-center text-white">Your squeaks:</h3>
+        
+    </div>
+    </div>
+    <br>
+
+
+
+ 
+<br>
+
+
+<div class="row">
+  <% messages.forEach(function(message) { %>
+    <div class="col-12">
+      <div class="<%= message.messageColour %>"> <!-- Add the messageColour class here -->
+        <div class="card-body">
+          <h5 class="card-title"><%= message.sender %></h5>
+           <!-- Format the timestamp using toLocaleString -->
+           <p class="card-text"><%= message.timestamp.toLocaleString('en-ZA') %></p>
+          <p class="card-text"><%= message.content %></p>
+          <!-- You can add more card content here -->
+        </div>
+      </div>
+       <!-- Add a console.log statement to log messageColour -->
+       <script>
+        console.log('messageColour:', '<%= message.messageColour %>');
+      </script>
+    </div>
+  <% }) %>
+  <br>
+</div>
+<br>
+
+<!-- Add the message input form card -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Send a Message</h5>
+        <form action="/messagesend" method="post">
+          <div class="form-group">
+         
+            <textarea class="form-control" id="messageContent" name="messageContent" rows="3"></textarea>
+          </div>
+          <br>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+</div>
+<br>
+</div>
+  
+ 
+
+
+  
+<script>
+  // Function to reload the page
+  function reloadHomePage() {
+    window.location.reload();
+  }
+
+
+  
+  setInterval(reloadHomePage, 45000);
+</script>
+
+<script>
+document.getElementById("startAgain").addEventListener("click", function() {
+    window.location.href = "/";
+});
+
+
+</script>
+
+    <script src="index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+        </script>
+        <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.js')
+          .then(function(registration) {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(function(error) {
+            console.error('Service Worker registration failed:', error);
+          });
+        }
+        </script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.js"></script>
+
+        
+  
+     
+
+</body>
+
+<footer class="sticky-footer bg-light">
+  <div class="container-fluid">
+    <div class="row justify-content-end">
+      <div class="col-auto">
+        <h6>Bray Road Solutions 2023</h6>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+</html>
