@@ -6,6 +6,10 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const mongoose = require("mongoose");
+const socketIo = require('socket.io');
+const http = require('http');
+
+
 
 require('dotenv').config();
 const MongoStore = require('connect-mongo');
@@ -26,7 +30,10 @@ const moment = require('moment-timezone');
  
 
 const app = express();
-const PORT = process.env.PORT || 3000
+// const PORT = process.env.PORT || 3000
+
+const server = http.createServer(app);
+const io = socketIo(server);  // Pass the http server instance to Socket.io
 
 app.set('view engine', 'ejs');
 
