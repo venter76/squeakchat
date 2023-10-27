@@ -35,11 +35,7 @@ self.addEventListener('install', (event) => {
 
 
 
-//         caches.open(CACHE_NAME).then((cache) => {
-//             return cache.addAll(STATIC_ASSETS);
-//         })
-//     );
-// });
+
 
 
 
@@ -63,11 +59,7 @@ self.addEventListener('fetch', (event) => {
                     return caches.match('/placeholderchat.html');
                 }
 
-            // caches.match(event.request).then((response) => {
-            //     return response || fetch(event.request).then((fetchResponse) => {
-            //         return caches.open(CACHE_NAME).then((cache) => {
-            //             cache.put(event.request, fetchResponse.clone());
-            //             return fetchResponse;
+          
                     })
                 );
             } else {
