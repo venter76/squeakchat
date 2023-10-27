@@ -32,8 +32,7 @@ const moment = require('moment-timezone');
 const app = express();
 // const PORT = process.env.PORT || 3000
 
-const server = http.createServer(app);
-const io = socketIo(server);  // Pass the http server instance to Socket.io
+
 
 app.set('view engine', 'ejs');
 
