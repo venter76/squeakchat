@@ -6,8 +6,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const mongoose = require("mongoose");
-const socketIo = require('socket.io');
-const http = require('http');
+
 
 
 
