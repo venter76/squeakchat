@@ -121,6 +121,8 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Send a Message</h5>
+        <!-- Toast notification -->
+    <div id="toast">Some text here</div>
         <form action="/messagesend" method="post">
           <div class="form-group">
          
@@ -249,17 +251,30 @@ function sendSubscriptionToServer(subscription) {
 </script>
 <script>
   // Check if BroadcastChannel is supported
-  if ('BroadcastChannel' in self) {
-      // Create a BroadcastChannel
-      const broadcast = new BroadcastChannel('push-channel');
+if ('BroadcastChannel' in self) {
+    // Create a BroadcastChannel
+    const broadcast = new BroadcastChannel('push-channel');
 
-      // Listen for messages
-      broadcast.onmessage = function(event) {
-          // Update your UI here
-          console.log('Received data from service worker:', event.data);
-          // For example, you can display a toast or update a badge count
-      };
-  }
+    // Listen for messages
+    broadcast.onmessage = function(event) {
+        // Update your UI here
+        console.log('Received data from service worker:', event.data);
+
+        // Display a toast notification
+        showToast(event.data.title, event.data.body);
+    };
+}
+
+function showToast(title, body) {
+    // Assuming you have an element with the ID 'toast' in your HTML
+    const toast = document.getElementById('toast');
+    toast.textContent = `${title}: ${body}`;
+
+    // Show the toast for a few seconds
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 </script>
 
 
