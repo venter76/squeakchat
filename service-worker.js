@@ -1,4 +1,4 @@
-const CACHE_NAME = 'static-cache-v5';
+const CACHE_NAME = 'static-cache-v6';
 const STATIC_ASSETS = [
     
     '/iconLarge_1.png',
@@ -106,5 +106,30 @@ self.addEventListener('fetch', (event) => {
             }
         });
     
-    
+        self.addEventListener('notificationclick', function(event) {
+            event.notification.close(); // Close the notification to prevent it from lingering
+        
+            // Define the URL to open when the notification is clicked
+            const targetUrl = '/dashboard';
+        
+            // Attempt to focus or open a new window/tab
+            event.waitUntil(
+                clients.matchAll({ type: 'window', includeUncontrolled: true })
+                    .then(function(windowClients) {
+                        // Check if there's already a window/tab open with this app
+                        for (let i = 0; i < windowClients.length; i++) {
+                            const client = windowClients[i];
+                            if (client.url === targetUrl && 'focus' in client) {
+                                return client.focus(); // Focus if found
+                            }
+                        }
+        
+                        // If no window/tab is found, open a new one
+                        if (clients.openWindow) {
+                            return clients.openWindow(targetUrl);
+                        }
+                    })
+            );
+        });
+        
     
