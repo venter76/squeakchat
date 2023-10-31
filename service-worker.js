@@ -55,8 +55,8 @@ self.addEventListener('push', function(event) {
     console.log("Received push data:", data);
     const options = {
         body: data.body,
-        // icon: '/iconLarge_1.png',
-        // badge: '/iconLarge_1.png',
+        icon: '/iconLarge_1.png',
+        badge: '/iconLarge_1.png',
         // add more options if needed like images, actions, etc.
     };
 
