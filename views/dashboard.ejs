@@ -249,6 +249,21 @@ function sendSubscriptionToServer(subscription) {
 </script>
 
 <script>
+  // Check if BroadcastChannel is supported
+  if ('BroadcastChannel' in self) {
+      // Create a BroadcastChannel
+      const broadcast = new BroadcastChannel('push-channel');
+
+      // Listen for messages
+      broadcast.onmessage = function(event) {
+          // Update your UI here
+          console.log('Received data from service worker:', event.data);
+          // For example, you can display a toast or update a badge count
+      };
+  }
+</script>
+
+<script>
   document.getElementById('sendNotification').addEventListener('click', function() {
     fetch('/api/send-notification/', {
         method: 'POST',

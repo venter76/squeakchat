@@ -50,6 +50,8 @@ self.addEventListener('activate', (event) => {
     // });
 });
 
+
+
 self.addEventListener('push', function(event) {
     const data = event.data.json();
     console.log("Received push data:", data);
@@ -60,9 +62,18 @@ self.addEventListener('push', function(event) {
         // add more options if needed like images, actions, etc.
     };
 
+    // Create a BroadcastChannel
+    const broadcast = new BroadcastChannel('push-channel');
+
+    // Send a message to all clients through the channel
+    broadcast.postMessage(data);
+
+    // Close the channel
+    broadcast.close();
+
     event.waitUntil(
         self.registration.showNotification(data.title, options)
-        .then(() => console.log('Notification shown!'))
+            .then(() => console.log('Notification shown!'))
             .catch(err => console.error('Error showing notification:', err))
     );
 });
