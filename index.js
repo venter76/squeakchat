@@ -37,6 +37,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(flash());
 
 
@@ -61,6 +62,17 @@ transporter.verify(function (error, success) {
 });
 
 
+const webpush = require('web-push');
+
+// You'd retrieve these from wherever you securely stored them.
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+
+webpush.setVapidDetails(
+  'mailto:venter76@gmail.com',  // This email is usually a contact email associated with your app
+  VAPID_PUBLIC_KEY,
+  VAPID_PRIVATE_KEY
+);
 
 
 
@@ -129,6 +141,17 @@ const messageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', messageSchema);
 
 
+
+
+const subscriptionSchema = new mongoose.Schema({
+    endpoint: String,
+    keys: {
+        p256dh: String,
+        auth: String
+    }
+});
+
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
 
 
@@ -203,6 +226,40 @@ app.use(session({
 
 
 
+  const sendNotification = async () => {
+    try {
+      // Retrieve all subscriptions from the database
+      const subscriptions = await Subscription.find();
+  
+      // Define your notification content
+      const payload = JSON.stringify({
+        title: 'Hello!',
+        body: 'This is a push notification from your application!'
+      });
+  
+      // Send a notification to each subscription
+      await Promise.all(subscriptions.map(async (subscription) => {
+        try {
+          await webpush.sendNotification(subscription, payload);
+          console.log("Notification sent successfully to:", subscription.endpoint);
+        } catch (error) {
+          console.error("Failed to send notification to:", subscription.endpoint, error);
+          if (error.statusCode === 410) {
+            // Subscription has expired or been unsubscribed
+            await Subscription.deleteOne({ _id: subscription._id });
+            console.log('Subscription has expired or been unsubscribed. Removed from database.');
+          }
+        }
+      }));
+  
+    } catch (error) {
+      console.error("Failed to retrieve subscriptions:", error);
+    }
+  };
+  
+
+// Schedule the function to run every minute (for testing)
+cron.schedule('* * * * *', sendNotification);
 
 
   
@@ -618,6 +675,103 @@ app.post('/reset/:token', async function(req, res, next) {
     next(err); 
   }
 });
+
+
+
+app.post('/api/save-subscription/', async (req, res) => {
+  try {
+      const subscription = req.body;
+      
+      // Log the subscription to see if it contains the expected data
+      // console.log(subscription);
+
+      // Assuming you have a Mongoose model for the subscription
+      const newSubscription = new Subscription(subscription);
+      await newSubscription.save();
+
+      res.json({ success: true });
+  } catch (error) {
+      console.error("Failed to save subscription:", error);
+      res.status(500).json({ error: 'Failed to save subscription' });
+  }
+});
+
+
+// Unsubscribe endpoint
+app.post('/api/unsubscribe', async (req, res) => {
+  try {
+      const subscription = req.body;
+
+      // Find the subscription in the database and remove it
+      const result = await Subscription.deleteOne({ endpoint: subscription.endpoint });
+      
+      if (result.deletedCount === 1) {
+          res.json({ success: true, message: 'Successfully unsubscribed.' });
+      } else {
+          res.json({ success: false, message: 'Subscription not found in the database.' });
+      }
+  } catch (error) {
+      console.error('Error while unsubscribing:', error);
+      res.status(500).json({ error: 'Failed to unsubscribe.' });
+  }
+});
+
+
+
+
+
+app.post('/api/send-notification/', async (req, res) => {
+  try {
+    // Retrieve subscription object from your database
+    const subscription = await Subscription.findOne(); // Adjust this line according to your database retrieval logic
+    
+    // Define your notification content
+    const payload = JSON.stringify({
+      title: 'Hello!',
+      body: 'This is a push notification from your application!'
+    });
+
+     // Send the push notification
+     await webpush.sendNotification(subscription, payload);
+
+     res.json({ success: true, message: 'Notification sent successfully!' });
+ } catch (error) {
+     console.error("Failed to send notification:", error);
+     
+     if(error.statusCode === 410) {
+         // Handle expired subscription
+         await Subscription.deleteOne({ endpoint: error.endpoint }); // Adjust this line for your database deletion logic
+         res.status(410).json({ error: 'Subscription has expired or been unsubscribed. Removed from database.' });
+     } else {
+         res.status(500).json({ error: 'Failed to send notification' });
+     }
+ }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

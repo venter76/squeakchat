@@ -129,6 +129,9 @@
           <br>
           <button type="submit" class="btn btn-primary">Send</button>
         </form>
+        <button id="unsubscribeButton">Unsubscribe from Notifications</button>
+        <button id="sendNotification">Send Notification</button>
+
       </div>
     </div>
   </div>
@@ -139,6 +142,7 @@
   
  
 
+<script src="/unsub.js"></script>
 
   
 <script>
@@ -149,7 +153,7 @@
 
 
   
-  setInterval(reloadHomePage, 45000);
+  setInterval(reloadHomePage, 100000);
 </script>
 
 
@@ -157,17 +161,116 @@
    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
         </script>
-        <script>
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/service-worker.js')
-          .then(function(registration) {
-            console.log('Service Worker registered with scope:', registration.scope);
-          })
-          .catch(function(error) {
-            console.error('Service Worker registration failed:', error);
-          });
+
+
+<script>
+  // First, you register the service worker.
+  if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+      .then(function(registration) {
+          console.log('Service Worker registered with scope:', registration.scope);
+
+          // Store the registration object for later use (like subscribing to push)
+          window.swRegistration = registration;
+          
+          // Check if the user is already subscribed
+        return registration.pushManager.getSubscription();
+    })
+    .then(function(subscription) {
+        if (subscription) {
+            console.log('User is already subscribed:', subscription);
+            // You can send the subscription to server again if needed or just log it
+        } else {
+            // User is not subscribed, call the subscribe function
+            subscribeToPush();
         }
-        </script>
+    })
+    .catch(function(error) {
+        console.error('Service Worker registration failed:', error);
+    });
+}
+
+  // The function to subscribe to push
+  function subscribeToPush() {
+      const publicKey = 'BKUfJN99AJ9f7aG_cntY9HLc3Er3KjNfL9mR2MDn7iPJMphffD2psMYGfbTMegF3IhASG9K8pYtotkGTVWhW8Hk'; // This should be URL-safe base64 encoded
+      const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+
+      swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+      }).then(function(subscription) {
+          console.log('User is subscribed:', subscription);
+          return sendSubscriptionToServer(subscription);
+      }).catch(function(error) {
+          console.error('Failed to subscribe the user:', error);
+      });
+  }
+
+  
+// Helper function to convert your public VAPID key
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+
+function sendSubscriptionToServer(subscription) {
+    return fetch('/api/save-subscription/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(subscription)
+    }).then(function(response) {
+        if (!response.ok) {
+            throw new Error('Bad status code from server.');
+        }
+        return response.json();
+    }).then(function(responseData) {
+      // Log the server response
+      console.log("Server Response:", responseData);
+      if (!responseData.success) {
+            throw new Error('Bad response from server.');
+        }
+    });
+}
+
+  
+</script>
+
+<script>
+  document.getElementById('sendNotification').addEventListener('click', function() {
+    fetch('/api/send-notification/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            console.log("Notification sent successfully!");
+        } else {
+            console.error("Failed to send notification.");
+        }
+    })
+    .catch(error => {
+        console.error("There was an error sending the notification:", error);
+    });
+});
+
+</script>
+
         
         <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.js"></script>
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'static-cache-v4';
+const CACHE_NAME = 'static-cache-v5';
 const STATIC_ASSETS = [
     
     '/iconLarge_1.png',
@@ -41,9 +41,38 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     console.log('Service Worker activated!');
+
+     // Manually trigger a test notification
+    //  self.registration.showNotification('Test Notification', {
+    //     body: 'This is a test push notification!',
+    //     icon: '/iconLarge_1.png',
+    //     badge: '/iconLarge_1.png',
+    // });
 });
 
+self.addEventListener('push', function(event) {
+    const data = event.data.json();
+    console.log("Received push data:", data);
+    const options = {
+        body: data.body,
+        // icon: '/iconLarge_1.png',
+        // badge: '/iconLarge_1.png',
+        // add more options if needed like images, actions, etc.
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+        .then(() => console.log('Notification shown!'))
+            .catch(err => console.error('Error showing notification:', err))
+    );
+});
+
+
+
 self.addEventListener('fetch', (event) => {
+    if (event.request.method === 'POST') {
+        return;  // skip caching for POST requests
+    }
     const dynamicPaths = ['/', '/dashboard'];
 
     if (dynamicPaths.some(path => event.request.url.includes(path))) {
