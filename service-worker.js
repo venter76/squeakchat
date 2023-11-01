@@ -1,4 +1,4 @@
-const CACHE_NAME = 'static-cache-v8';
+const CACHE_NAME = 'static-cache-v9';
 const STATIC_ASSETS = [
     
     '/iconLarge_1.png',
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
     '/NXRX.gif',
     '/penguin.gif',
     '/cat.gif',
+    '/sound.mp3',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
    
     // ... other static assets
@@ -61,6 +62,7 @@ self.addEventListener('push', function(event) {
         body: data.body,
         icon: '/iconLarge_1.png',
         badge: '/iconLarge_1.png',
+        sound: '/sound.mp3'  // Path to the sound file
     };
 
     const broadcast = new BroadcastChannel('push-channel');
