@@ -26,6 +26,7 @@ const moment = require('moment-timezone');
 
 
 
+
  
 
 const app = express();
@@ -226,40 +227,40 @@ app.use(session({
 
 
 
-  const sendNotification = async () => {
-    try {
-      // Retrieve all subscriptions from the database
-      const subscriptions = await Subscription.find();
+//   const sendNotification = async () => {
+//     try {
+//       // Retrieve all subscriptions from the database
+//       const subscriptions = await Subscription.find();
   
-      // Define your notification content
-      const payload = JSON.stringify({
-        title: 'Hello!',
-        body: 'This is a push notification from your application!'
-      });
+//       // Define your notification content
+//       const payload = JSON.stringify({
+//         title: 'Hello!',
+//         body: 'This is a push notification from your application!'
+//       });
   
-      // Send a notification to each subscription
-      await Promise.all(subscriptions.map(async (subscription) => {
-        try {
-          await webpush.sendNotification(subscription, payload);
-          console.log("Notification sent successfully to:", subscription.endpoint);
-        } catch (error) {
-          console.error("Failed to send notification to:", subscription.endpoint, error);
-          if (error.statusCode === 410) {
-            // Subscription has expired or been unsubscribed
-            await Subscription.deleteOne({ _id: subscription._id });
-            console.log('Subscription has expired or been unsubscribed. Removed from database.');
-          }
-        }
-      }));
+//       // Send a notification to each subscription
+//       await Promise.all(subscriptions.map(async (subscription) => {
+//         try {
+//           await webpush.sendNotification(subscription, payload);
+//           console.log("Notification sent successfully to:", subscription.endpoint);
+//         } catch (error) {
+//           console.error("Failed to send notification to:", subscription.endpoint, error);
+//           if (error.statusCode === 410) {
+//             // Subscription has expired or been unsubscribed
+//             await Subscription.deleteOne({ _id: subscription._id });
+//             console.log('Subscription has expired or been unsubscribed. Removed from database.');
+//           }
+//         }
+//       }));
   
-    } catch (error) {
-      console.error("Failed to retrieve subscriptions:", error);
-    }
-  };
+//     } catch (error) {
+//       console.error("Failed to retrieve subscriptions:", error);
+//     }
+//   };
   
 
-// Schedule the function to run every minute (for testing)
-cron.schedule('* * * * *', sendNotification);
+// // Schedule the function to run every minute (for testing)
+// cron.schedule('* * * * *', sendNotification);
 
 
   
@@ -833,11 +834,35 @@ app.post('/messagesend', async (req, res) => {
     // Save the message to the database
     await newMessage.save();
 
-    // Message saved successfully
-    res.redirect('/dashboard'); // Redirect to the messages page or handle the response as needed
+     // Begin sending notifications
+    console.log("Sending notifications...");
+    const subscriptions = await Subscription.find();
+    const payload = JSON.stringify({
+      title: 'New Message!',
+      body: 'A new message has been added to the chat!'
+    });
+
+    // Send a notification to each subscription
+    await Promise.all(subscriptions.map(async (subscription) => {
+      try {
+        await webpush.sendNotification(subscription, payload);
+        console.log("Notification sent successfully to:", subscription.endpoint);
+      } catch (error) {
+        console.error("Failed to send notification to:", subscription.endpoint, error);
+        if (error.statusCode === 410) {
+          // Subscription has expired or been unsubscribed
+          await Subscription.deleteOne({ _id: subscription._id });
+          console.log('Subscription has expired or been unsubscribed. Removed from database.');
+        }
+      }
+    }));
+    console.log("Notifications sent.");
+
+    // Message saved and notifications sent successfully
+    res.redirect('/dashboard'); 
   } catch (error) {
     console.error(error);
-    // Handle the error appropriately, e.g., send an error response
+    // Handle the error appropriately
     res.status(500).send('Internal Server Error');
   }
 });
