@@ -839,7 +839,7 @@ app.post('/messagesend', async (req, res) => {
     const subscriptions = await Subscription.find();
     const payload = JSON.stringify({
       title: 'New Message!',
-      body: 'A new message has been added to the chat!'
+      body: 'New Squeak!!'
     });
 
     // Send a notification to each subscription
