@@ -1,4 +1,4 @@
-const CACHE_NAME = 'static-cache-v9';
+const CACHE_NAME = 'static-cache-v10';
 const STATIC_ASSETS = [
     
     '/iconLarge_1.png',
@@ -62,8 +62,17 @@ self.addEventListener('push', function(event) {
         body: data.body,
         icon: '/iconLarge_1.png',
         badge: '/iconLarge_1.png',
-        sound: '/sound.mp3'  // Path to the sound file
+        // sound: '/sound.mp3'  // Path to the sound file
     };
+
+    // Try to play a sound manually
+  try {
+    const audio = new Audio('/sound.mp3');
+    audio.play();
+    console.log('Attempting to play notification sound');
+  } catch (error) {
+    console.error('Failed to play notification sound:', error);
+  }
 
     const broadcast = new BroadcastChannel('push-channel');
     broadcast.postMessage(data);
