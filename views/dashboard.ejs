@@ -288,6 +288,7 @@ function showToast(title, body) {
         </div>
       `;
       messageContainer.appendChild(messageElement);
+      messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
     // Listen for form submission
