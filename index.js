@@ -23,13 +23,17 @@ const bcrypt = require('bcryptjs');
 const redirectToDashboardIfAuthenticated = require('./redirectToDashboardIfAuthenticated');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment-timezone');
-
-
+const http = require('http');
+const socketIo = require('socket.io');
+const webpush = require('web-push');
 
 
  
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server
+const io = socketIo(server); // Attach Socket.io to the server
+
 const PORT = process.env.PORT || 3000
 
 
@@ -63,7 +67,7 @@ transporter.verify(function (error, success) {
 });
 
 
-const webpush = require('web-push');
+
 
 // You'd retrieve these from wherever you securely stored them.
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
@@ -775,15 +779,13 @@ app.post('/api/send-notification/', async (req, res) => {
 
 
 
-
-
 app.get('/dashboard', checkAuthenticated, async (req, res) => {
   try {
     // Fetch messages from the database
     const messages = await Message.find();
 
     // Render the messages using EJS template
-    res.render('dashboard', { messages });
+    res.render('dashboard', { messages, user: req.user });
   } catch (error) {
     // Handle errors
     console.error(error);
@@ -792,21 +794,17 @@ app.get('/dashboard', checkAuthenticated, async (req, res) => {
 });
 
 
+io.on('connection', (socket) => {
+  console.log('User connected', socket.id);
+
+  socket.on('sendMessage', async (data) => {
+    try {
+      const senderName = data.sender;
+      const timestamp = moment().tz('Africa/Johannesburg').toDate();
+      const content = data.message;
+      let messageColour;
 
 
-app.post('/messagesend', async (req, res) => {
-  try {
-    // Assuming you have user authentication and the user's first name is available in req.user.firstname
-    const senderName = req.user.firstname;
-
-    // Get the current timestamp in Johannesburg time zone
-    const timestamp = moment().tz('Africa/Johannesburg').toDate();
-
-    // Get the message content from the request body
-    const content = req.body.messageContent;
-
-    // Determine the messageColour based on the first letter of the sender's first name
-    let messageColour;
 
     if (senderName && typeof senderName === 'string' && senderName.length > 0) {
       const firstLetter = senderName[0].toUpperCase();
@@ -842,6 +840,14 @@ app.post('/messagesend', async (req, res) => {
       body: 'New Squeak!!'
     });
 
+    // Broadcast the message to all clients
+    io.emit('receiveMessage', {
+      sender: senderName,
+      timestamp: timestamp,
+      content: content,
+      messageColour: messageColour
+    });
+
     // Send a notification to each subscription
     await Promise.all(subscriptions.map(async (subscription) => {
       try {
@@ -857,15 +863,12 @@ app.post('/messagesend', async (req, res) => {
       }
     }));
     console.log("Notifications sent.");
-
-    // Message saved and notifications sent successfully
-    res.redirect('/dashboard'); 
   } catch (error) {
     console.error(error);
-    // Handle the error appropriately
-    res.status(500).send('Internal Server Error');
   }
 });
+});
+    
 
 
 app.post('/messagedelete', async (req, res) => {
@@ -902,9 +905,7 @@ app.get('/service-worker.js', (req, res) => {
 
 
 
-app.get('/logo', (req, res) => {
-  res.render('logo');
-});
+
 
 
 
@@ -917,10 +918,10 @@ app.get('/logo', (req, res) => {
 
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
-      console.log("listening for requests");
-  })
-})
+  server.listen(PORT, () => {
+    console.log(`Server listening for requests on port ${PORT}`);
+  });
+});
 
 
 

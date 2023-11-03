@@ -51,7 +51,7 @@
      
   
  
-
+     <script src="/socket.io/socket.io.js"></script>
 
 <link rel="manifest" href="manifest.json" />   
 <meta name="theme-color" content="#008B8B">
@@ -117,7 +117,7 @@
         <h5 class="card-title">Send a Message</h5>
         <!-- Toast notification -->
     
-        <form action="/messagesend" method="post">
+        <form id="messageForm">
           <div class="form-group">
          
             <textarea class="form-control" id="messageContent" name="messageContent" rows="3"></textarea>
@@ -136,20 +136,6 @@
 </div>
   
  
-
-<script src="/unsub.js"></script>
-
-  
-<script>
-  // Function to reload the page
-  function reloadHomePage() {
-    window.location.reload();
-  }
-
-
-  
-  setInterval(reloadHomePage, 150000);
-</script>
 
 
 
@@ -270,29 +256,61 @@ function showToast(title, body) {
 
 </script>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const socket = io.connect();
+    const messageForm = document.querySelector('#messageForm');
+    const messageContentInput = document.querySelector('#messageContent');
+    const messageContainer = document.querySelector('.row'); // Adjust if you have a different container class
+    const senderName = '<%= user.firstname %>';
 
-<!-- <script>
-  document.getElementById('sendNotification').addEventListener('click', function() {
-    fetch('/api/send-notification/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            console.log("Notification sent successfully!");
-        } else {
-            console.error("Failed to send notification.");
-        }
-    })
-    .catch(error => {
-        console.error("There was an error sending the notification:", error);
+    // Function to create a new message element and append it to the list
+    function appendMessage(data) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('col-12');
+      messageElement.innerHTML = `
+        <div class="${data.messageColour}">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title">${data.sender}</h5>
+            </div>
+            <div>
+              <p class="card-text text-right">${new Date(data.timestamp).toLocaleString('en-ZA')}</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text">${data.content}</p>
+            <form action="/messagedelete" method="POST">
+              <input type="hidden" name="messageId" value="${data._id}">
+              <button type="submit" class="btn btn-secondary">Delete</button>
+            </form>
+          </div>
+        </div>
+      `;
+      messageContainer.appendChild(messageElement);
+    }
+
+    // Listen for form submission
+    messageForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const messageContent = messageContentInput.value;
+
+      // Send message to server
+      socket.emit('sendMessage', {
+        sender: senderName,
+        message: messageContent
+      });
+
+      // Clear the input
+      messageContentInput.value = '';
     });
-});
 
-</script> -->
+    // Listen for new messages from the server
+    socket.on('receiveMessage', function(data) {
+      appendMessage(data);
+    });
+  });
+</script>
 
         
         <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.js"></script>
