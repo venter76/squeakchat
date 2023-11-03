@@ -77,7 +77,7 @@
 <div id="toast">Some text here</div>
 
 
-<div class="row">
+<div class="row" id="messageContainer">
   <% messages.forEach(function(message) { %>
     <div class="col-12">
       <div class="<%= message.messageColour %>"> <!-- Add the messageColour class here -->
@@ -261,8 +261,10 @@ function showToast(title, body) {
     const socket = io.connect();
     const messageForm = document.querySelector('#messageForm');
     const messageContentInput = document.querySelector('#messageContent');
-    const messageContainer = document.querySelector('.row'); // Adjust if you have a different container class
+    const messageContainer = document.querySelector('#messageContainer');
+
     const senderName = '<%= user.firstname %>';
+    
 
     // Function to create a new message element and append it to the list
     function appendMessage(data) {
